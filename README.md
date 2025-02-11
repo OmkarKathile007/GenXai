@@ -1,6 +1,5 @@
 # One Platform Endless AI Possibilities
 
-![Banner](https://via.placeholder.com/1200x400) <!-- Add your banner image here -->
 
 An all-in-one AI platform designed to accelerate career growth through powerful AI tools for writing, coding, and professional development.
 
@@ -30,8 +29,8 @@ An all-in-one AI platform designed to accelerate career growth through powerful 
 
 - **Frontend**: Next.js, Tailwind CSS, Shadcn UI
 - **Authentication**: Clerk
-- **AI Engine**: Gemini AI
-- **Deployment**: Vercel (recommended)
+- **Generative ai**: Gemini AI
+
 
 ## ⚡ Getting Started
 
