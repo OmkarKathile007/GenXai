@@ -42,6 +42,13 @@ An all-in-one AI platform designed to accelerate career growth through powerful 
 
 ### Installation
 ```bash
-git clone https://github.com/yourusername/your-repo.git
+git clone https://github.com/OmkarKathile007/GenXai.git
 cd App
 npm install
+
+```
+
+Run Project
+
+```bash
+npm run dev
