@@ -40,7 +40,7 @@ const InterviewPage = () => {
       //     ],
       //   }
       // );
-      const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+      const apiKey=process.env.NEXT_PUBLIC_GEMINI_API_KEY;
           const genAI = new GoogleGenerativeAI(apiKey);
           
           const model = genAI.getGenerativeModel({
