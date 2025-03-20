@@ -5,6 +5,7 @@ import React from "react";
 import axios from "axios";
 import { useState } from "react";
 import { ClipboardCopy } from "lucide-react";
+import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
 
 const InterviewPage = () => {
   const [text, setText] = useState("");
@@ -25,22 +26,56 @@ const InterviewPage = () => {
     setCode("Loading...");
 
     try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Please rewrite the following text to improve its grammar and overall clarity while preserving the original meaning. Correct any punctuation, sentence structure, and word usage errors. Here is the text:${text}`,
-                },
-              ],
-            },
-          ],
-        }
-      );
+      // const response = await axios.post(
+      //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+      //   {
+      //     contents: [
+      //       {
+      //         parts: [
+      //           {
+      //             text: `Please rewrite the following text to improve its grammar and overall clarity while preserving the original meaning. Correct any punctuation, sentence structure, and word usage errors. Here is the text:${text}`,
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   }
+      // );
+      const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+          const genAI = new GoogleGenerativeAI(apiKey);
+          
+          const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash",
+          });
+          
+          const generationConfig = {
+            temperature: 1,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 8192,
+            responseMimeType: "text/plain",
+          };
+          const chatSession = model.startChat({
+            generationConfig,
+            history: [
+            ],
+          });
+        
+          const result = await chatSession.sendMessage( `Rewrite the following text to improve its grammar and clarity while preserving its original meaning. Correct any punctuation, sentence structure, and word usage errors. Do not include any additional commentary or explanations. Your response must have exactly the same number of lines as the input text.
 
-      setCode(response.data.candidates[0].content.parts[0].text);
+Here is the text:
+${text}`);
+          //console.log(result.response.text());
+      
+          // Simulate delay for modern feel and UX
+          // setTimeout(() => {
+          //   setAnswer(result.response.text());
+          //   setLoader(false);
+          //   setDisplayquiz(true);
+          //   setHidden("hidden");
+          // }, 3000);
+        
+
+      setCode(result.response.text());
     } catch (error) {
       setCode("Error generating summary. Please try again.");
       console.error("API error:", error);

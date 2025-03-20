@@ -4,6 +4,7 @@ import React from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import SpinnerLoad from '@/components/SpinnerLoad';
+import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
 
 const GenAI = () => {
     const [question, setQuestion] = useState("");
@@ -12,51 +13,125 @@ const GenAI = () => {
     const [displayQuiz, setDisplayquiz] = useState(false);
     const [hide, setHidden] = useState("");
 
-    async function generateAns() {
-        setLoader(true);
-        setAnswer("loading");
+//     async function generateAns() {
+//         setLoader(true);
+//         setAnswer("loading");
 
-        const response = await axios({
-            url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-            method: "post",
-            data: {
-                contents: [
-                    { parts: [{ text: `"I want a highly detailed 6-month roadmap to achieve [specific goal]. The plan should include a strict daily schedule with hour-by-hour utilization, covering learning, practice, revision, mindset growth, and practical application. It must ensure continuous improvement, include weekly and monthly milestones, and guarantee success if followed rigorously. Make it as detailed and structured as possible."
+//         const response = await axios({
+//             url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+//             method: "post",
+//             data: {
+//                 contents: [
+//                     { parts: [{ text: `"I want a highly detailed 6-month roadmap to achieve [specific goal]. The plan should include a strict daily schedule with hour-by-hour utilization, covering learning, practice, revision, mindset growth, and practical application. It must ensure continuous improvement, include weekly and monthly milestones, and guarantee success if followed rigorously. Make it as detailed and structured as possible."
 
-Key Points to Include in the Plan:
-Daily Hour-by-Hour Schedule
+// Key Points to Include in the Plan:
+// Daily Hour-by-Hour Schedule
 
-Learning new concepts
-Hands-on practice
-Revision sessions
-Breaks and relaxation
-Mindset growth activities
-Weekly and Monthly Milestones
+// Learning new concepts
+// Hands-on practice
+// Revision sessions
+// Breaks and relaxation
+// Mindset growth activities
+// Weekly and Monthly Milestones
 
-Specific learning goals
-Practical applications and projects
-Self-assessment and mock tests
-Continuous Growth & Mindset Building
+// Specific learning goals
+// Practical applications and projects
+// Self-assessment and mock tests
+// Continuous Growth & Mindset Building
 
-Reflection on progress
-Adaptation based on weaknesses
-Problem-solving challenges
-Revision & Feedback Loop
+// Reflection on progress
+// Adaptation based on weaknesses
+// Problem-solving challenges
+// Revision & Feedback Loop
 
-Daily and weekly revision plans
-Self-testing and improvement strategy
-Peer discussions or mentorship about the following topic: ${question}. ` }] },
-                ]
-            }
-        });
+// Daily and weekly revision plans
+// Self-testing and improvement strategy
+// Peer discussions or mentorship about the following topic: ${question}. ` }] },
+//                 ]
+//             }
+//         });
+async function generateAns() {
+    setLoader(true);
+    setAnswer("loading");
 
-        setTimeout(() => {
-            setAnswer(response['data']['candidates'][0]['content']['parts'][0]['text']);
-            setLoader(false);
-            setDisplayquiz(true);
-            setHidden("hidden");
-        }, 3000);
-    }
+    // const response = await axios({
+    //   url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+    //   method: "post",
+    //   data: {
+    //     contents: [
+    //       {
+    //         parts: [{
+    //           text: `Generate a ten-question quiz in MCQ format about the following topic: ${question}. Ensure each question includes multiple choices and is related to the context and dont give answer at last`
+    //         }]
+    //       },
+    //     ]
+    //   }
+    // });
+    const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+    
+    const generationConfig = {
+      temperature: 1,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+      responseMimeType: "text/plain",
+    };
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [
+      ],
+    });
+  
+    const result = await chatSession.sendMessage(`"I want a highly detailed 6-month roadmap to achieve [specific goal]. The plan should include a strict daily schedule with hour-by-hour utilization, covering learning, practice, revision, mindset growth, and practical application. It must ensure continuous improvement, include weekly and monthly milestones, and guarantee success if followed rigorously. Make it as detailed and structured as possible."
+
+// Key Points to Include in the Plan:
+// Daily Hour-by-Hour Schedule
+
+// Learning new concepts
+// Hands-on practice
+// Revision sessions
+// Breaks and relaxation
+// Mindset growth activities
+// Weekly and Monthly Milestones
+
+// Specific learning goals
+// Practical applications and projects
+// Self-assessment and mock tests
+// Continuous Growth & Mindset Building
+
+// Reflection on progress
+// Adaptation based on weaknesses
+// Problem-solving challenges
+// Revision & Feedback Loop
+
+// Daily and weekly revision plans
+// Self-testing and improvement strategy
+// Peer discussions or mentorship about the following topic: ${question}. Generate only 10 lines`);
+    //console.log(result.response.text());
+
+    // Simulate delay for modern feel and UX
+    setTimeout(() => {
+      setAnswer(result.response.text());
+      setLoader(false);
+      setDisplayquiz(true);
+      setHidden("hidden");
+    }, 3000);
+  }
+
+//         setTimeout(() => {
+//             setAnswer(response['data']['candidates'][0]['content']['parts'][0]['text']);
+//             setLoader(false);
+//             setDisplayquiz(true);
+//             setHidden("hidden");
+//         }, 3000);
+    
+
+
 
     const downloadQuiz = () => {
         const element = document.createElement("a");
@@ -100,7 +175,7 @@ Peer discussions or mentorship about the following topic: ${question}. ` }] },
                 <div className=' w-full md:min-w-full flex items-center justify-self-center'>
                     {displayQuiz && (
                         <div className='w-full flex flex-col justify-center'>
-                            <pre className='rounded-lg   text-lg text-lime-400'>{answer}</pre>
+                            <pre className='rounded-lg mt-10  text-lg text-lime-400'>{answer}</pre>
                             <button
                                 className='mt-4 w-1/2 px-4 py-2 m-auto bg-green-600 text-white rounded-md'
                                 onClick={downloadQuiz}

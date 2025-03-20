@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy } from "lucide-react";
 import axios from "axios";
+import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
 
 const CodeConverter = () => {
   const [inputLanguage, setInputLanguage] = useState("");
@@ -26,20 +27,47 @@ const CodeConverter = () => {
     setConvertedCode("Loading...");
 
     try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [
-                { text: `Convert the following ${inputLanguage} code to ${outputLanguage}:\n\n${text}` },
-              ],
-            },
-          ],
-        }
-      );
+      // const response = await axios.post(
+      //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+      //   {
+      //     contents: [
+      //       {
+      //         parts: [
+      //           { text: `Convert the following ${inputLanguage} code to ${outputLanguage}:\n\n${text}` },
+      //         ],
+      //       },
+      //     ],
+      //   }
+      // );
+      const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+          const genAI = new GoogleGenerativeAI(apiKey);
+          
+          const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash",
+          });
+          
+          const generationConfig = {
+            temperature: 1,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 8192,
+            responseMimeType: "text/plain",
+          };
+          const chatSession = model.startChat({
+            generationConfig,
+            history: [
+            ],
+          });
+        
+          const result = await chatSession.sendMessage( `Convert the following ${inputLanguage} code to ${outputLanguage}:
 
-      setConvertedCode(response.data.candidates[0].content.parts[0].text);
+            ${text}
+            
+            Please output only the converted code without any explanation, title, or extra comments.`);
+          
+        
+
+      setConvertedCode(result.response.text());
     } catch (error) {
       setConvertedCode("Error converting code. Please try again.");
       console.error("API error:", error);

@@ -4,6 +4,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
 
 const EmailWriter = () => {
   const [toEmail, setToEmail] = useState("");
@@ -20,28 +21,54 @@ const EmailWriter = () => {
     setEmailContent("Loading...");
 
     try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Please generate a professional email with the following details:
-To: ${toEmail}
-Recipient Name: ${recipientName}
-Subject: ${subject}
+//       const response = await axios.post(
+//         `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+//         {
+//           contents: [
+//             {
+//               parts: [
+//                 {
+//                   text: `Please generate a professional email with the following details:
+// To: ${toEmail}
+// Recipient Name: ${recipientName}
+// Subject: ${subject}
                 
-The email should be well-structured, clear, and grammatically correct. Make sure to include a polite greeting and a proper closing.`,
-                },
-              ],
-            },
-          ],
-        }
-      );
+// The email should be well-structured, clear, and grammatically correct. Make sure to include a polite greeting and a proper closing.`,
+//                 },
+//               ],
+//             },
+//           ],
+//         }
+//       );
+const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+    
+    const generationConfig = {
+      temperature: 1,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+      responseMimeType: "text/plain",
+    };
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [
+      ],
+    });
+  
+    const result = await chatSession.sendMessage( `Please generate a professional email with the following details:
+      // To: ${toEmail}
+      // Recipient Name: ${recipientName}
+      // Subject: ${subject}
+                      
+      // The email should be well-structured, clear, and grammatically correct. Make sure to include a polite greeting and a proper closing.`);
 
       setEmailContent(
-        response.data.candidates[0].content.parts[0].text
+        result.response.text()
       );
     } catch (error) {
       console.error("API error:", error);
