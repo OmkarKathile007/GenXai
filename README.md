@@ -15,7 +15,8 @@ GenXai is a modern AI-powered career growth platform that brings together multip
 - **Text Improver**: Refines and optimizes text for clarity and impact.
 
 ## 📷 Demo
-![Landing Page Screenshot](./public/demo.png)
+![Landing Page Screenshot](App/public/images/Hero.png)
+![Main Page](App/public/images/Main.png)
 
 ## 📊 Platform Stats
 | Metric                       | Value        |
