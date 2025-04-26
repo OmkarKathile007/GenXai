@@ -16,7 +16,7 @@ GenXai is a modern AI-powered career growth platform that brings together multip
 
 ## 📷 Demo
 ![Landing Page Screenshot](App/public/images/Hero.png)
-![Main Page](App/public/images/Main.png)
+Login with Your Account and Enter GenxHub
 
 ## 📊 Platform Stats
 | Metric                       | Value        |
