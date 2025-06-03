@@ -12,7 +12,7 @@ const EmailWriter = () => {
   const [subject, setSubject] = useState("");
   const [emailContent, setEmailContent] = useState("");
 
-  async function generateAns(e) {
+  const  generateAns=async(e)=> {
     e.preventDefault();
 
     // Validate inputs
@@ -20,60 +20,39 @@ const EmailWriter = () => {
 
     setEmailContent("Loading...");
 
-    try {
-//       const response = await axios.post(
-//         `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-//         {
-//           contents: [
-//             {
-//               parts: [
-//                 {
-//                   text: `Please generate a professional email with the following details:
-// To: ${toEmail}
-// Recipient Name: ${recipientName}
-// Subject: ${subject}
-                
-// The email should be well-structured, clear, and grammatically correct. Make sure to include a polite greeting and a proper closing.`,
-//                 },
-//               ],
-//             },
-//           ],
-//         }
-//       );
-const apiKey=process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
-    
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-      responseMimeType: "text/plain",
-    };
-    const chatSession = model.startChat({
-      generationConfig,
-      history: [
-      ],
-    });
-  
-    const result = await chatSession.sendMessage( `Please generate a professional email with the following details:
-      // To: ${toEmail}
-      // Recipient Name: ${recipientName}
-      // Subject: ${subject}
-                      
-      // The email should be well-structured, clear, and grammatically correct. Make sure to include a polite greeting and a proper closing.`);
 
-      setEmailContent(
-        result.response.text()
-      );
-    } catch (error) {
-      console.error("API error:", error);
-      setEmailContent("Error generating email. Please try again.");
+
+
+     
+    console.log("📝 About to POST, text state:", JSON.stringify(subject));
+
+    if (!toEmail.trim()||!recipientName.trim() || !subject.trim()) {
+      console.warn("No text to send!");
+      return;
     }
+    // var res1='';
+    try {
+      const response = await fetch("http://localhost:8080/api/ai/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toEmail,recipientName,subject }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+     
+      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
+   
+      console.log("🟢 Server responded with:", text1);
+      setEmailContent(text1 || "No answer returned.");
+    } catch (err) {
+      console.error("🛑 Error generating answer:", err);
+      setEmailContent("Error: " + err.message);
+    }
+
   }
 
   return (

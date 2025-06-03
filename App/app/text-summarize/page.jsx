@@ -12,31 +12,36 @@ function App() {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function generateAns() {
-    if (!text.trim()) return; // Prevent empty requests
+  const generateAns=async(e)=> {
+    e.preventDefault();
+    console.log("📝 About to POST, text state:", JSON.stringify(text));
 
-    setLoading(true);
-    setSummary("Loading...");
+    if (!text.trim()) {
+      console.warn("No text to send!");
+      return;
+    }
 
     try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [
-                { text: `Summarize the following text while maintaining technical accuracy: ${text}` },
-              ],
-            },
-          ],
-        }
-      );
+      const response = await fetch("http://localhost:8080/api/ai/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
 
-      setSummary(response.data.candidates[0].content.parts[0].text);
-    } catch (error) {
-      setSummary("Error generating summary. Please try again.");
-      console.error("API error:", error);
-    } finally {
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Expecting: { candidates: [ { content: { parts: [ { text: "…" } ] } } ] }
+      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      console.log("🟢 Server responded with:", text1);
+      setSummary(text1 || "No answer returned.");
+    } catch (err) {
+      console.error("🛑 Error generating answer:", err);
+      setSummary("Error: " + err.message);
+    }
+    finally{
       setLoading(false);
     }
   }

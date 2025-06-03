@@ -353,6 +353,13 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <footer className="text-white bg-neutral-900 py-12">
+                <div className="container mx-auto  px-4 text-center text-gray-200">
+                  <p>Made with 💗 by Omkar</p>
+                </div>
+            </footer>
+      
+
     </div>
   );
 }

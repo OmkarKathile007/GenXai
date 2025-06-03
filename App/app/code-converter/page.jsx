@@ -20,60 +20,41 @@ const CodeConverter = () => {
   const [convertedCode, setConvertedCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function generateAns() {
+  const  generateAns=async()=> {
     if (!text.trim() || !inputLanguage || !outputLanguage) return;
 
     setLoading(true);
     setConvertedCode("Loading...");
 
+  
+
+
+
+
+     
+    console.log("📝 About to POST, text state:", JSON.stringify(inputLanguage));
+
+    // var res1='';
     try {
-      // const response = await axios.post(
-      //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-      //   {
-      //     contents: [
-      //       {
-      //         parts: [
-      //           { text: `Convert the following ${inputLanguage} code to ${outputLanguage}:\n\n${text}` },
-      //         ],
-      //       },
-      //     ],
-      //   }
-      // );
-      
-      const apiKey=process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-          const genAI = new GoogleGenerativeAI(apiKey);
-          
-          const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-          });
-          
-          const generationConfig = {
-            temperature: 1,
-            topP: 0.95,
-            topK: 40,
-            maxOutputTokens: 8192,
-            responseMimeType: "text/plain",
-          };
-          const chatSession = model.startChat({
-            generationConfig,
-            history: [
-            ],
-          });
-        
-          const result = await chatSession.sendMessage( `Convert the following ${inputLanguage} code to ${outputLanguage}:
+      const response = await fetch("http://localhost:8080/api/ai/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inputLanguage, outputLanguage }),
+      });
 
-            ${text}
-            
-            Please output only the converted code without any explanation, title, or extra comments.`);
-          
-        
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
 
-      setConvertedCode(result.response.text());
-    } catch (error) {
-      setConvertedCode("Error converting code. Please try again.");
-      console.error("API error:", error);
-    } finally {
-      setLoading(false);
+      const data = await response.json();
+     
+      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
+   
+      console.log("🟢 Server responded with:", text1);
+      setConvertedCode(text1 || "No answer returned.");
+    } catch (err) {
+      console.error("🛑 Error generating answer:", err);
+      setConvertedCode("Error: " + err.message);
     }
   }
 

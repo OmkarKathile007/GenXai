@@ -16,13 +16,12 @@ const CoverLetterGenerator = () => {
     e.preventDefault();
 
     // Ensure no field is empty
-    if (!companyName.trim() || !jobTitle.trim() || !jobDescription.trim())
-      return;
+    
 
     // Show a loading state
     setCoverLetter("Loading...");
 
-    try {
+//     try {
 //       const response = await axios.post(
 //         `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
 //         {
@@ -42,40 +41,78 @@ const CoverLetterGenerator = () => {
 //           ],
 //         }
 //       );
-const apiKey=process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const genAI = new GoogleGenerativeAI(apiKey);
+// const apiKey = "AIzaSyADh3WJQYUNU7T1n3vtNqtPwOsxCcoud-M";
+//     const genAI = new GoogleGenerativeAI(apiKey);
     
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
+//     const model = genAI.getGenerativeModel({
+//       model: "gemini-2.0-flash",
+//     });
     
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-      responseMimeType: "text/plain",
-    };
-    const chatSession = model.startChat({
-      generationConfig,
-      history: [
-      ],
-    });
+//     const generationConfig = {
+//       temperature: 1,
+//       topP: 0.95,
+//       topK: 40,
+//       maxOutputTokens: 8192,
+//       responseMimeType: "text/plain",
+//     };
+//     const chatSession = model.startChat({
+//       generationConfig,
+//       history: [
+//       ],
+//     });
   
-    const result = await chatSession.sendMessage(`Please generate a professional cover letter for a job application with the following details:
-// Company Name: ${companyName}
-// Job Title: ${jobTitle}
-// Job Description: ${jobDescription}
+//     const result = await chatSession.sendMessage(`Please generate a professional cover letter for a job application with the following details:
+// // Company Name: ${companyName}
+// // Job Title: ${jobTitle}
+// // Job Description: ${jobDescription}
 
-// Ensure the cover letter is well-structured, grammatically correct, and tailored to the provided information.`);
+// // Ensure the cover letter is well-structured, grammatically correct, and tailored to the provided information.`);
 
-      // Assuming the API returns the generated cover letter in this format:
-      setCoverLetter(result.response.text());
-    } catch (error) {
-      console.error("API error:", error);
-      setCoverLetter("Error generating cover letter. Please try again.");
+//       // Assuming the API returns the generated cover letter in this format:
+//       setCoverLetter(result.response.text());
+//     } catch (error) {
+//       console.error("API error:", error);
+//       setCoverLetter("Error generating cover letter. Please try again.");
+//     }
+e.preventDefault();
+    if (!companyName.trim() || !jobTitle.trim() || !jobDescription.trim())
+      return;
+
+
+    setCoverLetter("Loading...");
+
+
+
+
+     
+    console.log("📝 About to POST, text state:", JSON.stringify(jobDescription));
+
+    // var res1='';
+    try {
+      const response = await fetch("http://localhost:8080/api/ai/letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyName, jobTitle, jobDescription }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+     
+      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
+   
+      console.log("🟢 Server responded with:", text1);
+      setCoverLetter(text1 || "No answer returned.");
+    } catch (err) {
+      console.error("🛑 Error generating answer:", err);
+      setCoverLetter("Error: " + err.message);
     }
+
   }
+
+  
 
   return (
     <div className="min-h-screen   flex flex-col items-center p-6">

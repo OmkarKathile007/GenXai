@@ -50,86 +50,48 @@ const GenAI = () => {
 //                 ]
 //             }
 //         });
-async function generateAns() {
+const  generateAns=async()=> {
     setLoader(true);
     setAnswer("loading");
+    console.log("📝 About to POST, text state:", JSON.stringify(question));
 
-    // const response = await axios({
-    //   url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-    //   method: "post",
-    //   data: {
-    //     contents: [
-    //       {
-    //         parts: [{
-    //           text: `Generate a ten-question quiz in MCQ format about the following topic: ${question}. Ensure each question includes multiple choices and is related to the context and dont give answer at last`
-    //         }]
-    //       },
-    //     ]
-    //   }
-    // });
-    const apiKey=process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const genAI = new GoogleGenerativeAI(apiKey);
+    if (!question.trim()) {
+      console.warn("No text to send!");
+      return;
+    }
+    // var res1='';
+    try {
+      const response = await fetch("http://localhost:8080/api/ai/roadmap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+     
+      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
+   
+      console.log("🟢 Server responded with:", text1);
+      setAnswer(text1 || "No answer returned.");
+    } catch (err) {
+      console.error("🛑 Error generating answer:", err);
+      setAnswer("Error: " + err.message);
+    }
+
     
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
-    
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-      responseMimeType: "text/plain",
-    };
-    const chatSession = model.startChat({
-      generationConfig,
-      history: [
-      ],
-    });
-  
-    const result = await chatSession.sendMessage(`"I want a highly detailed 6-month roadmap to achieve [specific goal]. The plan should include a strict daily schedule with hour-by-hour utilization, covering learning, practice, revision, mindset growth, and practical application. It must ensure continuous improvement, include weekly and monthly milestones, and guarantee success if followed rigorously. Make it as detailed and structured as possible."
-
-// Key Points to Include in the Plan:
-// Daily Hour-by-Hour Schedule
-
-// Learning new concepts
-// Hands-on practice
-// Revision sessions
-// Breaks and relaxation
-// Mindset growth activities
-// Weekly and Monthly Milestones
-
-// Specific learning goals
-// Practical applications and projects
-// Self-assessment and mock tests
-// Continuous Growth & Mindset Building
-
-// Reflection on progress
-// Adaptation based on weaknesses
-// Problem-solving challenges
-// Revision & Feedback Loop
-
-// Daily and weekly revision plans
-// Self-testing and improvement strategy
-// Peer discussions or mentorship about the following topic: ${question}. Generate only 10 lines`);
-    //console.log(result.response.text());
-
     // Simulate delay for modern feel and UX
     setTimeout(() => {
-      setAnswer(result.response.text());
+     
       setLoader(false);
       setDisplayquiz(true);
       setHidden("hidden");
     }, 3000);
   }
 
-//         setTimeout(() => {
-//             setAnswer(response['data']['candidates'][0]['content']['parts'][0]['text']);
-//             setLoader(false);
-//             setDisplayquiz(true);
-//             setHidden("hidden");
-//         }, 3000);
-    
 
 
 
@@ -137,7 +99,7 @@ async function generateAns() {
         const element = document.createElement("a");
         const file = new Blob([answer], { type: "text/plain" });
         element.href = URL.createObjectURL(file);
-        element.download = "quiz.txt"; // You can use .docx for Word document
+        element.download = "roadmap.txt"; // You can use .docx for Word document
         document.body.appendChild(element); 
         element.click();
         document.body.removeChild(element); 
