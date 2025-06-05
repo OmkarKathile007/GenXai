@@ -36,7 +36,7 @@ const CodeConverter = () => {
 
     // var res1='';
     try {
-      const response = await fetch("http://localhost:8080/api/ai/convert", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/convert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inputLanguage, outputLanguage }),

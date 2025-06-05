@@ -32,7 +32,7 @@ const EmailWriter = () => {
     }
     // var res1='';
     try {
-      const response = await fetch("http://localhost:8080/api/ai/email", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ toEmail,recipientName,subject }),

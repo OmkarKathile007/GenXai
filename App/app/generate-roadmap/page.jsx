@@ -13,43 +13,7 @@ const GenAI = () => {
     const [displayQuiz, setDisplayquiz] = useState(false);
     const [hide, setHidden] = useState("");
 
-//     async function generateAns() {
-//         setLoader(true);
-//         setAnswer("loading");
 
-//         const response = await axios({
-//             url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
-//             method: "post",
-//             data: {
-//                 contents: [
-//                     { parts: [{ text: `"I want a highly detailed 6-month roadmap to achieve [specific goal]. The plan should include a strict daily schedule with hour-by-hour utilization, covering learning, practice, revision, mindset growth, and practical application. It must ensure continuous improvement, include weekly and monthly milestones, and guarantee success if followed rigorously. Make it as detailed and structured as possible."
-
-// Key Points to Include in the Plan:
-// Daily Hour-by-Hour Schedule
-
-// Learning new concepts
-// Hands-on practice
-// Revision sessions
-// Breaks and relaxation
-// Mindset growth activities
-// Weekly and Monthly Milestones
-
-// Specific learning goals
-// Practical applications and projects
-// Self-assessment and mock tests
-// Continuous Growth & Mindset Building
-
-// Reflection on progress
-// Adaptation based on weaknesses
-// Problem-solving challenges
-// Revision & Feedback Loop
-
-// Daily and weekly revision plans
-// Self-testing and improvement strategy
-// Peer discussions or mentorship about the following topic: ${question}. ` }] },
-//                 ]
-//             }
-//         });
 const  generateAns=async()=> {
     setLoader(true);
     setAnswer("loading");
@@ -61,7 +25,7 @@ const  generateAns=async()=> {
     }
     // var res1='';
     try {
-      const response = await fetch("http://localhost:8080/api/ai/roadmap", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/roadmap`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
