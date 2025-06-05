@@ -2,9 +2,10 @@
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import React from 'react'
+import React, { use } from 'react'
 //import Router from 'next/navigation'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 
 
@@ -12,6 +13,7 @@ import { useRouter } from 'next/navigation'
 const page = () => {
 
     const router=useRouter();
+    const [start,setStart]=useState(false);
     const AI_Interview = async (e) => {
 
     e.preventDefault();
@@ -62,7 +64,7 @@ const page = () => {
                         className="mt-1 "
                       />
                     </div>
-                    <Button type="submit" className="w-full">
+                    <Button  type="submit" className="w-full">
                       Create Mock Interview
                     </Button>
                     
@@ -70,6 +72,7 @@ const page = () => {
                   </form>
                   
                   </Card>
+                  
     </div>
   )
 }
