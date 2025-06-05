@@ -6,6 +6,7 @@ import Header from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 const inter=Inter({subsets:['latin']});
 
