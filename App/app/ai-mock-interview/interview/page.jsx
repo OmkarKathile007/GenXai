@@ -7,9 +7,7 @@
 // import { Mic, MicOff, Brain, Wand2, Sparkles } from "lucide-react";
 
 // // Replace with your actual Google Gemini (Text-Bison) model endpoint and API key
-// const GEMINI_API_KEY = "AIzaSyCxqR3jzEUOvoOiCIN71-LmFOVySvMbO9M";
-// const GEMINI_ENDPOINT =
-//   `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
 
 // /**
 //  * Calls Google Gemini (Text-Bison) to get the next interviewer's message.
