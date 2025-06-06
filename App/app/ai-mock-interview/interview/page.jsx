@@ -537,7 +537,7 @@ export default function HomePage() {
     // Fetch the AI’s next question/response
     const aiReply = await fetchAIResponse(transcript);
 
-    // Add AI’s message to chat
+ 
     setMessages((prev) => [...prev, { type: "system", text: aiReply }]);
 
     // Speak the AI’s reply
