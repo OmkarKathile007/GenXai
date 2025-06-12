@@ -50,14 +50,6 @@
   - Leverages Google Gemini’s REST API to deliver precise answers to technical or domain-specific questions.  
   - Aggregates responses from multiple AI models (including the AI Mock Interview engine) for comparison and refinement :contentReference[oaicite:5]{index=5}.
 
-- **AI Mock Interview**  
-  - Simulates a technical interview experience with randomized question sets from multiple domains (Data Structures, System Design, Behavioral).  
-  - Provides real-time feedback and scoring to help users prepare for actual interviews. :contentReference[oaicite:6]{index=6}.
-
-- **AI-Powered Career Guidance**  
-  - Offers personalized career advice (e.g., “Which technology stack should I learn next?”) based on user profile and current industry trends.  
-  - 24/7 AI support for resume reviews, LinkedIn optimization, and skill gap analysis. :contentReference[oaicite:7]{index=7}.
-
 - **Responsive, Intuitive UI**  
   - Built with Next.js (React) and Shadcn UI components, styled via Tailwind CSS for a clean, modern experience.  
   - Mobile-first design ensures usability on any device. :contentReference[oaicite:8]{index=8}.
