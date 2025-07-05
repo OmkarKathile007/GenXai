@@ -26,7 +26,7 @@ const Header=async ()=> {
             width={200}
             height={60}
           />*/}
-          <span className="text-5xl font-bold  text-gray-300">GenXai</span> 
+          <span className="text-5xl font-bold  text-gray-300">GenxAI</span> 
           {/* <span className="text-5xl font-bold text-yellow-400" >ai</span> */}
         </Link>
         <div className="flex items-center space-x-2 md:space-x-4">

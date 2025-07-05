@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
+// import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
 
 const EmailWriter = () => {
   const [toEmail, setToEmail] = useState("");
