@@ -1,133 +1,5 @@
-// "use client";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import { Textarea } from "@/components/ui/textarea";
-// import React, { useState } from "react";
-// import { Button } from "@/components/ui/button";
-// import { ClipboardCopy } from "lucide-react";
-// import axios from "axios";
-// import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
-
-// const CodeConverter = () => {
-//   const [inputLanguage, setInputLanguage] = useState("");
-//   const[inputCode, setInputCode] = useState("");
-//   const [outputLanguage, setOutputLanguage] = useState("");
-//   const [text, setText] = useState("");
-//   const [convertedCode, setConvertedCode] = useState("");
-//   const [loading, setLoading] = useState(false);
 
 
-//   function changeCode() {
-//     if (inputLanguage === "C++") {
-//       setInputLanguage("C++");
-//     }
-    
-//   }
-//   const  generateAns=async()=> {
-//     if (!text.trim() || !inputLanguage || !outputLanguage) return;
-
-//     setLoading(true);
-//     setConvertedCode("Loading...");
-     
-//     console.log("📝 About to POST, text state:", JSON.stringify(inputLanguage));
-
-//     // var res1='';
-//     try {
-//       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/convert`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ inputLanguage,inputCode, outputLanguage }),
-//       });
-
-//       if (!response.ok) {
-//         throw new Error(`Server error: ${response.status}`);
-//       }
-
-//       const data = await response.json();
-     
-//       const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
-   
-//       console.log("🟢 Server responded with:", text1);
-//       setConvertedCode(text1 || "No answer returned.");
-//     } catch (err) {
-//       console.error("🛑 Error generating answer:", err);
-//       setConvertedCode("Error: " + err.message);
-//     }
-//   }
-
-//   const copyToClipboard = () => {
-//     navigator.clipboard.writeText(convertedCode).then(() => {
-//       alert("Converted code copied to clipboard!");
-//     }).catch(err => {
-//       console.error("Failed to copy: ", err);
-//     });
-//   };
-
-//   return (
-//     <div className="mt-20 m-auto w-5/6 h-screen flex flex-col md:flex-row gap-10 md:gap-16">
-//       {/* Code Input Section */}
-//       <div className="w-11/12 md:w-2/5 flex mx-auto items-center flex-col gap-6">
-//         <Select onValueChange={setInputLanguage}>
-//           <SelectTrigger className="w-[180px]">
-//             <SelectValue placeholder="Select Input Language" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectItem onClick={changeCode} value="C++">C++</SelectItem>
-//             <SelectItem onClick={changeCode} value="Java">Java</SelectItem>
-//             <SelectItem onClick={changeCode} value="Python">Python</SelectItem>
-//             <SelectItem onClick={changeCode} value="C">C</SelectItem>
-//             <SelectItem onClick={changeCode} value="Javascript">Javascript</SelectItem>
-//             <SelectItem onClick={changeCode} value="Rust">Rust</SelectItem>
-//           </SelectContent>
-//         </Select>
-//         <Textarea
-//           value={text}
-//           onChange={(e) => setText(e.target.value)}
-//           className="border border-pink-50 h-40"
-//           placeholder="Input your code here"
-//         />
-//         <Button className="px-10" onClick={generateAns} disabled={loading}>
-//           {loading ? "Converting..." : "Convert"}
-//         </Button>
-//       </div>
-
-//       <div className="hidden md:block text-2xl mt-20 font-bold">TO</div>
-
-//       {/* Converted Code Section */}
-//       <div className="w-11/12 md:w-2/5 flex mx-auto items-center flex-col gap-6">
-//         <Select onValueChange={setOutputLanguage}>
-//           <SelectTrigger className="w-[180px]">
-//             <SelectValue placeholder="Select Output Language" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectItem value="C++">C++</SelectItem>
-//             <SelectItem value="Java">Java</SelectItem>
-//             <SelectItem value="Python">Python</SelectItem>
-//             <SelectItem value="C">C</SelectItem>
-//             <SelectItem value="Javascript">Javascript</SelectItem>
-//             <SelectItem value="Rust">Rust</SelectItem>
-//           </SelectContent>
-//         </Select>
-//         <Textarea
-//           className="border border-pink-50 h-40"
-//           placeholder="Converted code will appear here"
-//           value={convertedCode}
-//           readOnly
-//         />
-//         <Button className="px-6 flex items-center gap-2" onClick={copyToClipboard}>
-//           <ClipboardCopy className="w-5 h-5" /> Copy
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CodeConverter;
 "use client";
 
 import React, { useState } from "react";
@@ -141,7 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ClipboardCopy } from "lucide-react";
+import { ClipboardCopy, Loader2 } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const CodeConverter = () => {
   const [inputLanguage, setInputLanguage] = useState("");
@@ -149,29 +22,87 @@ const CodeConverter = () => {
   const [outputLanguage, setOutputLanguage] = useState("");
   const [convertedCode, setConvertedCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+
+  // Helper to extract clean code from JSON response
+  const extractTextFromRawResponse = (rawString) => {
+    try {
+      const parsed = JSON.parse(rawString);
+      let text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
+      // CLEANUP: Remove Markdown backticks (```java ... ```) and whitespace
+      text = text.replace(/^```[a-z]*\n/i, "") // Remove opening ```java
+                 .replace(/```$/i, "")         // Remove closing ```
+                 .trim();                      // Remove extra spaces
+      
+      return text || "No code returned.";
+    } catch (e) {
+      return rawString;
+    }
+  };
+
+  const pollJobStatus = async (jobId) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+        );
+
+        console.log("Polling...", data.status);
+
+        if (data.status === "COMPLETED") {
+          clearInterval(pollInterval);
+          const cleanCode = extractTextFromRawResponse(data.responseData);
+          setConvertedCode(cleanCode);
+          setLoading(false);
+          setStatusMessage("Completed!");
+        } else if (data.status === "FAILED") {
+          clearInterval(pollInterval);
+          setConvertedCode("Error: Task failed on server.");
+          setLoading(false);
+          setStatusMessage("Failed");
+        } else {
+          setStatusMessage(`Status: ${data.status}...`);
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        setConvertedCode("Error polling status: " + err.message);
+        setLoading(false);
+      }
+    }, 2000); // Check every 2 seconds
+  };
 
   const generateAns = async () => {
     if (!inputLanguage || !inputCode.trim() || !outputLanguage) return;
 
     setLoading(true);
     setConvertedCode("");
+    setStatusMessage("Queueing...");
 
     try {
+      // 1. Send Request to Backend
+      const payload = {
+        code: inputCode, 
+        targetLanguage: outputLanguage
+      };
+
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/convert`,
-        { inputLanguage, inputCode, outputLanguage },
+        payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      let resultText =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "         No answer returned.";
-        resultText=resultText.substring(10,resultText.length-3);
-      setConvertedCode(resultText);
+      // 2. Start Polling using the Job ID
+      if (data.jobId) {
+        setStatusMessage("Processing...");
+        pollJobStatus(data.jobId);
+      } else {
+        throw new Error("No Job ID received from server");
+      }
+
     } catch (err) {
       console.error(err);
       setConvertedCode("Error: " + (err.message || "Unknown error"));
-    } finally {
       setLoading(false);
     }
   };
@@ -184,8 +115,9 @@ const CodeConverter = () => {
   };
 
   return (
+    <ProtectedRoute>
     <div className="mt-20 mx-auto w-5/6 h-screen flex flex-col md:flex-row gap-10 md:gap-16">
-      {/* INPUT */}
+      {/* INPUT SECTION */}
       <div className="w-11/12 md:w-2/5 flex flex-col items-center gap-6">
         <Select onValueChange={setInputLanguage}>
           <SelectTrigger className="w-[180px]">
@@ -203,7 +135,7 @@ const CodeConverter = () => {
         <Textarea
           value={inputCode}
           onChange={(e) => setInputCode(e.target.value)}
-          className="border border-pink-50 h-40 w-full"
+          className="border border-pink-50 h-96 w-full font-mono text-sm"
           placeholder="Paste your source code here"
         />
 
@@ -212,15 +144,22 @@ const CodeConverter = () => {
           onClick={generateAns}
           disabled={loading || !inputLanguage || !inputCode || !outputLanguage}
         >
-          {loading ? "Converting..." : "Convert"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {statusMessage}
+            </>
+          ) : (
+            "Convert"
+          )}
         </Button>
       </div>
 
-      <div className="hidden md:flex items-center text-2xl font-bold">
+      <div className="hidden md:flex items-center text-2xl font-bold text-gray-500">
         TO
       </div>
 
-      {/* OUTPUT */}
+      {/* OUTPUT SECTION */}
       <div className="w-11/12 md:w-2/5 flex flex-col items-center gap-6">
         <Select onValueChange={setOutputLanguage}>
           <SelectTrigger className="w-[180px]">
@@ -236,8 +175,8 @@ const CodeConverter = () => {
         </Select>
 
         <Textarea
-          className="border border-pink-50 h-40 w-full"
-          placeholder="Converted code will appear here"
+          className="border border-pink-50 h-96 w-full font-mono text-sm bg-transparent"
+          placeholder="Converted code will appear here..."
           value={convertedCode}
           readOnly
         />
@@ -247,10 +186,11 @@ const CodeConverter = () => {
           onClick={copyToClipboard}
           disabled={!convertedCode}
         >
-          <ClipboardCopy className="w-5 h-5" /> Copy
+          <ClipboardCopy className="w-5 h-5" /> Copy Code
         </Button>
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 

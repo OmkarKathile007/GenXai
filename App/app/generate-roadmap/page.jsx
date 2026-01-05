@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useState } from 'react';
-import SpinnerLoad from '@/components/SpinnerLoad';
-import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
+import SpinnerLoad from '@/components/SpinnerLoad'; // Ensure this path is correct for your project
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const GenAI = () => {
     const [question, setQuestion] = useState("");
@@ -12,85 +11,121 @@ const GenAI = () => {
     const [loader, setLoader] = useState(false);
     const [displayQuiz, setDisplayquiz] = useState(false);
     const [hide, setHidden] = useState("");
+    const [statusMessage, setStatusMessage] = useState("");
 
+    // Helper to extract clean text from raw Gemini JSON
+    const extractTextFromRawResponse = (rawString) => {
+        try {
+            const parsed = JSON.parse(rawString);
+            return parsed.candidates?.[0]?.content?.parts?.[0]?.text || "No text found.";
+        } catch (e) {
+            return rawString;
+        }
+    };
 
-const  generateAns=async()=> {
-    setLoader(true);
-    setAnswer("loading");
-    console.log("📝 About to POST, text state:", JSON.stringify(question));
+    const pollJobStatus = async (jobId) => {
+        const pollInterval = setInterval(async () => {
+            try {
+                const { data } = await axios.get(
+                    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+                );
 
-    if (!question.trim()) {
-      console.warn("No text to send!");
-      return;
-    }
-    // var res1='';
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/roadmap`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
-      });
+                console.log("Polling...", data.status);
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+                if (data.status === "COMPLETED") {
+                    clearInterval(pollInterval);
+                    const cleanRoadmap = extractTextFromRawResponse(data.responseData);
+                    setAnswer(cleanRoadmap);
+                    setLoader(false);
+                    setDisplayquiz(true);
+                    setHidden("hidden");
+                } else if (data.status === "FAILED") {
+                    clearInterval(pollInterval);
+                    setAnswer("Error: Task failed on server.");
+                    setLoader(false);
+                    alert("Job Failed. Please try again.");
+                } else {
+                    setStatusMessage(`Status: ${data.status}...`);
+                }
+            } catch (err) {
+                clearInterval(pollInterval);
+                console.error("Polling Error:", err);
+                setLoader(false);
+            }
+        }, 2000); // Check every 2 seconds
+    };
 
-      const data = await response.json();
-     
-      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
-   
-      console.log("🟢 Server responded with:", text1);
-      setAnswer(text1 || "No answer returned.");
-    } catch (err) {
-      console.error("🛑 Error generating answer:", err);
-      setAnswer("Error: " + err.message);
-    }
+    const generateAns = async () => {
+        if (!question.trim()) {
+            console.warn("No text to send!");
+            return;
+        }
 
-    
-    // Simulate delay for modern feel and UX
-    setTimeout(() => {
-     
-      setLoader(false);
-      setDisplayquiz(true);
-      setHidden("hidden");
-    }, 3000);
-  }
+        setLoader(true);
+        setAnswer("");
+        setStatusMessage("Queueing...");
 
+        try {
+            // 1. Submit Job
+            // Note: Ensure your backend prompt expects {{topic}} or simply uses the input as the prompt
+            // Based on previous steps, the controller might expect "topic" and "duration" or just "question".
+            // Adjusting payload to match your likely controller expectation:
+            const payload = { question: question }; 
 
+            const { data } = await axios.post(
+                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/roadmap`,
+                payload,
+                { headers: { "Content-Type": "application/json" } }
+            );
 
+            // 2. Start Polling
+            if (data.jobId) {
+                setStatusMessage("Generating Roadmap...");
+                pollJobStatus(data.jobId);
+            } else {
+                throw new Error("No Job ID received");
+            }
+        } catch (err) {
+            console.error("🛑 Error generating answer:", err);
+            setAnswer("Error: " + err.message);
+            setLoader(false);
+        }
+    };
 
     const downloadQuiz = () => {
         const element = document.createElement("a");
         const file = new Blob([answer], { type: "text/plain" });
         element.href = URL.createObjectURL(file);
-        element.download = "roadmap.txt"; // You can use .docx for Word document
-        document.body.appendChild(element); 
+        element.download = "roadmap.txt";
+        document.body.appendChild(element);
         element.click();
-        document.body.removeChild(element); 
+        document.body.removeChild(element);
     };
 
     return (
         <>
-            <div className='min-w-full bg-black h-full'>
+        <ProtectedRoute>
+            <div className='min-w-full bg-black h-full min-h-screen text-white'>
                 {loader ? (
-                    <div>
+                    <div className="flex flex-col items-center justify-center h-screen">
                         <SpinnerLoad />
+                        <p className="mt-4 text-sky-400 animate-pulse">{statusMessage}</p>
                     </div>
                 ) : (
-                    <div className={`w-full bg-black h-screen flex flex-col items-center gap-4 ${hide}`}>
-                        <h1 className='text-white tracking-wider text-5xl font-sans font-bold mt-56'>DISCUSS ABOUT YOUR GOAL</h1>
-                        <p>Discuss what you want to achieve in next 6 months </p>
-                        <p></p>
+                    <div className={`w-full flex flex-col items-center gap-4 ${hide}`}>
+                        <h1 className='tracking-wider text-5xl font-sans font-bold mt-32 text-center'>DISCUSS YOUR GOAL</h1>
+                        <p className="text-gray-400">Describe what you want to achieve in the next 6 months</p>
+                        
                         <textarea
-                            className='w-4/5 bg-transparent p-6 border-2 border-white text-white'
+                            className='w-4/5 md:w-1/2 bg-transparent p-6 border-2 border-white rounded-lg focus:border-sky-400 outline-none transition-all'
                             value={question}
-                            placeholder='discuss here what you want to achieve in 6 months'
+                            placeholder='e.g., I want to become a Senior Java Developer, master System Design, and learn Cloud deployment.'
                             onChange={(e) => { setQuestion(e.target.value) }}
-                            cols="30"
-                            rows="10"
+                            rows="8"
                         ></textarea>
+                        
                         <button
-                            className='rounded-md w-1/3 my-0 mx-auto p-4 bg-sky-400 text-white'
+                            className='rounded-md w-4/5 md:w-1/3 p-4 bg-sky-500 hover:bg-sky-600 transition-colors text-white font-bold tracking-wide'
                             onClick={generateAns}
                         >
                             Generate Roadmap
@@ -98,24 +133,26 @@ const  generateAns=async()=> {
                     </div>
                 )}
 
-                <div className=' w-full md:min-w-full flex items-center justify-self-center'>
+                <div className='w-full flex items-center justify-center p-10'>
                     {displayQuiz && (
-                        <div className='w-full flex flex-col justify-center'>
-                            <pre className='rounded-lg mt-10  text-lg text-lime-400'>{answer}</pre>
+                        <div className='w-full md:w-3/4 flex flex-col justify-center animate-in fade-in duration-700'>
+                            <h2 className="text-2xl font-bold text-sky-400 mb-4 border-b border-gray-700 pb-2">Your Personalized Roadmap</h2>
+                            <pre className='rounded-lg bg-gray-900 p-6 text-lg text-lime-400 whitespace-pre-wrap font-mono border border-gray-800 shadow-2xl overflow-x-auto'>
+                                {answer}
+                            </pre>
                             <button
-                                className='mt-4 w-1/2 px-4 py-2 m-auto bg-green-600 text-white rounded-md'
+                                className='mt-6 px-8 py-3 m-auto bg-green-600 hover:bg-green-700 text-white rounded-md font-semibold transition-colors'
                                 onClick={downloadQuiz}
                             >
-                                Download Roadmap
+                                Download Roadmap (.txt)
                             </button>
                         </div>
                     )}
                 </div>
             </div>
+            </ProtectedRoute>
         </>
     );
 };
 
 export default GenAI;
-
-

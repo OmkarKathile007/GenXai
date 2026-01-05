@@ -171,97 +171,167 @@
 // It remains almost the same—since CORS is now handled by the server, no front-end changes are needed
 // other than ensuring you POST to http://localhost:8080/text.
 
+
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ClipboardCopy } from "lucide-react";
+import { ClipboardCopy, Loader2, Sparkles, PenTool } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const InterviewPage = () => {
-  const [text, setText] = useState("");
-  const [code, setCode] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [improvedText, setImprovedText] = useState("");
+  
+  // Async States
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
-  const copyToClipboard = () => {
-    navigator.clipboard
-      .writeText(code)
-      .then(() => {
-        alert("Improved Query copied to clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy: ", err);
-      });
+  // Helper to clean up Gemini's raw JSON response
+  const extractTextFromRawResponse = (rawString) => {
+    try {
+      const parsed = JSON.parse(rawString);
+      return parsed.candidates?.[0]?.content?.parts?.[0]?.text || "No text found.";
+    } catch (e) {
+      return rawString;
+    }
+  };
+
+  const pollJobStatus = async (jobId) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+        );
+
+        console.log("Polling...", data.status);
+
+        if (data.status === "COMPLETED") {
+          clearInterval(pollInterval);
+          const cleanText = extractTextFromRawResponse(data.responseData);
+          setImprovedText(cleanText);
+          setLoading(false);
+          setStatusMessage("Completed!");
+        } else if (data.status === "FAILED") {
+          clearInterval(pollInterval);
+          setImprovedText("Error: Task failed on server.");
+          setLoading(false);
+          setStatusMessage("Failed");
+        } else {
+          setStatusMessage(`Status: ${data.status}...`);
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        setImprovedText("Error polling status: " + err.message);
+        setLoading(false);
+      }
+    }, 2000); // Check every 2 seconds
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("📝 About to POST, text state:", JSON.stringify(text));
+    if (!inputText.trim()) return;
 
-    if (!text.trim()) {
-      console.warn("No text to send!");
-      return;
-    }
+    setLoading(true);
+    setImprovedText("");
+    setStatusMessage("Queueing...");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/text`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
+      // 1. Submit Job
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/text`,
+        { text: inputText },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+      // 2. Start Polling
+      if (data.jobId) {
+        setStatusMessage("Improving your text...");
+        pollJobStatus(data.jobId);
+      } else {
+        throw new Error("No Job ID received");
       }
-
-      const data = await response.json();
-      // Expecting: { candidates: [ { content: { parts: [ { text: "…" } ] } } ] }
-      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      console.log("🟢 Server responded with:", text1);
-      setCode(text1 || "No answer returned.");
     } catch (err) {
-      console.error("🛑 Error generating answer:", err);
-      setCode("Error: " + err.message);
+      console.error("Error:", err);
+      setImprovedText("Error: " + (err.message || "Unknown error"));
+      setLoading(false);
     }
   };
 
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(improvedText)
+      .then(() => alert("Copied to clipboard!"))
+      .catch((err) => console.error("Failed to copy: ", err));
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 md:py-16">
-      <div className="w-full max-w-2xl space-y-8">
+    <ProtectedRoute>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-slate-950 text-slate-100">
+      <div className="w-full max-w-3xl space-y-8">
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold flex items-center justify-center gap-3 text-white">
+            <PenTool className="w-8 h-8 text-purple-500" />
+            AI Text Improver
+          </h1>
+          <p className="text-slate-400 mt-2">Refine your answers for interviews & emails</p>
+        </div>
+
+        {/* INPUT FORM */}
         <form
           onSubmit={handleSubmit}
-          className="border p-4 rounded shadow-md flex flex-col gap-4"
+          className="border border-slate-800 bg-slate-900 p-6 rounded-xl shadow-lg flex flex-col gap-4"
         >
-          <p className="text-white text-center text-xl">Input your response here</p>
+          <label className="text-slate-300 font-medium">Input your draft here</label>
           <Textarea
-            className="w-full min-h-[150px] p-3 rounded border focus:outline-none"
-            onChange={(e) => setText(e.target.value)}
-            value={text}
-            placeholder="Input your query"
+            className="w-full min-h-[150px] p-4 rounded-lg bg-slate-950 border-slate-700 text-white focus:border-purple-500 transition-colors"
+            onChange={(e) => setInputText(e.target.value)}
+            value={inputText}
+            placeholder="e.g. I worked on java project and made api..."
             name="text"
           />
-          <button
+          <Button
             type="submit"
-            className="w-full sm:w-1/2 m-auto bg-blue-600 text-white py-2 rounded"
+            className="w-full sm:w-1/2 m-auto bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold transition-all"
+            disabled={loading || !inputText}
           >
-            Improve
-          </button>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {statusMessage}
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" /> Improve Text
+              </>
+            )}
+          </Button>
         </form>
 
-        {/* Output Section */}
-        <div className="border p-4 rounded shadow-md flex flex-col gap-4">
-          <p className="text-white text-center text-xl">Your Improved Text Goes Here</p>
+        {/* OUTPUT SECTION */}
+        <div className="border border-slate-800 bg-slate-900 p-6 rounded-xl shadow-lg flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <label className="text-slate-300 font-medium">Polished Version</label>
           <Textarea
-            className="w-full min-h-[150px] p-3 rounded border focus:outline-none"
+            className="w-full min-h-[150px] p-4 rounded-lg bg-slate-950 border-slate-700 text-green-400 font-medium"
             name="text"
-            value={code}
+            value={improvedText}
             readOnly
+            placeholder="Your improved text will appear here..."
           />
-          <Button className="px-6 flex items-center gap-2" onClick={copyToClipboard}>
-            <ClipboardCopy className="w-5 h-5" /> Copy to Clipboard
+          <Button 
+            className="self-end px-6 flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700" 
+            onClick={copyToClipboard}
+            disabled={!improvedText}
+          >
+            <ClipboardCopy className="w-4 h-4" /> Copy
           </Button>
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 

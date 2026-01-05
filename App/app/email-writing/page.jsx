@@ -1,122 +1,188 @@
-"use client"
+"use client";
+
 import React, { useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-// import {GoogleGenerativeAI,HarmCategory,  HarmBlockThreshold} from "@google/generative-ai";
+import { Loader2, Mail, Send } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const EmailWriter = () => {
-  const [toEmail, setToEmail] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [subject, setSubject] = useState("");
+  const [points, setPoints] = useState(""); // New field for email context
   const [emailContent, setEmailContent] = useState("");
+  
+  // Async States
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
-  const  generateAns=async(e)=> {
-    e.preventDefault();
-
-    // Validate inputs
-    if (!toEmail.trim() || !recipientName.trim() || !subject.trim()) return;
-
-    setEmailContent("Loading...");
-
-
-
-
-     
-    console.log("📝 About to POST, text state:", JSON.stringify(subject));
-
-    if (!toEmail.trim()||!recipientName.trim() || !subject.trim()) {
-      console.warn("No text to send!");
-      return;
-    }
-    // var res1='';
+  // Helper to extract clean text from raw Gemini JSON
+  const extractTextFromRawResponse = (rawString) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toEmail,recipientName,subject }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
-     
-      const text1 = data.candidates?.[0]?.content?.parts?.[0]?.text;
-   
-      console.log("🟢 Server responded with:", text1);
-      setEmailContent(text1 || "No answer returned.");
-    } catch (err) {
-      console.error("🛑 Error generating answer:", err);
-      setEmailContent("Error: " + err.message);
+      const parsed = JSON.parse(rawString);
+      return parsed.candidates?.[0]?.content?.parts?.[0]?.text || "No text found.";
+    } catch (e) {
+      return rawString;
     }
+  };
 
-  }
+  const pollJobStatus = async (jobId) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+        );
+
+        console.log("Polling...", data.status);
+
+        if (data.status === "COMPLETED") {
+          clearInterval(pollInterval);
+          const cleanEmail = extractTextFromRawResponse(data.responseData);
+          setEmailContent(cleanEmail);
+          setLoading(false);
+          setStatusMessage("Completed!");
+        } else if (data.status === "FAILED") {
+          clearInterval(pollInterval);
+          setEmailContent("Error: Task failed on server.");
+          setLoading(false);
+          setStatusMessage("Failed");
+        } else {
+          setStatusMessage(`Status: ${data.status}...`);
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        setEmailContent("Error polling status: " + err.message);
+        setLoading(false);
+      }
+    }, 2000); // Check every 2 seconds
+  };
+
+  const generateAns = async (e) => {
+    e.preventDefault();
+    if (!recipientName.trim() || !subject.trim() || !points.trim()) return;
+
+    setLoading(true);
+    setEmailContent("");
+    setStatusMessage("Queueing...");
+
+    try {
+      // 1. Submit Job
+      // Matching backend prompt keys: {{recipient_name}}, {{subject}}, {{points}}
+      const payload = {
+        recipient_name: recipientName,
+        subject: subject,
+        points: points
+      };
+
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/email`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      // 2. Start Polling
+      if (data.jobId) {
+        setStatusMessage("Drafting your email...");
+        pollJobStatus(data.jobId);
+      } else {
+        throw new Error("No Job ID received");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setEmailContent("Error: " + (err.message || "Unknown error"));
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen  flex items-center justify-center p-6">
-      <div className="w-full max-w-lg space-y-6">
-        <h1 className="text-3xl font-bold text-center">
-          AI Email Writer
-        </h1>
-        <form onSubmit={generateAns} className="space-y-4">
+    <ProtectedRoute>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950 text-slate-100">
+      <div className="w-full max-w-2xl space-y-8">
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold flex items-center justify-center gap-3 text-white">
+            <Mail className="w-8 h-8 text-blue-500" />
+            AI Email Writer
+          </h1>
+          <p className="text-slate-400 mt-2">Draft professional emails in seconds</p>
+        </div>
+
+        <form onSubmit={generateAns} className="space-y-4 bg-slate-900 p-8 rounded-xl border border-slate-800 shadow-xl">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Recipient Name
+              </label>
+              <Input
+                type="text"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+                placeholder="e.g. Hiring Manager"
+                className="bg-slate-950 border-slate-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Subject Line
+              </label>
+              <Input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="e.g. Project Update"
+                className="bg-slate-950 border-slate-700 text-white"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-300">
-              To Email
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Key Points / Message Details
             </label>
-            <Input
-              type="email"
-              value={toEmail}
-              onChange={(e) => setToEmail(e.target.value)}
-              placeholder="recipient@example.com"
-              className="mt-1 "
+            <Textarea
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              placeholder="What do you want to say? (e.g. 'Asking for a meeting on Tuesday to discuss the budget')"
+              className="h-[100px] bg-slate-950 border-slate-700 text-white"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Recipient Name
-            </label>
-            <Input
-              type="text"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              placeholder="Recipient Name"
-              className="mt-1 "
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Subject
-            </label>
-            <Input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Email Subject"
-              className="mt-1 "
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Generate Email
+
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 font-semibold"
+            disabled={loading || !recipientName || !subject || !points}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {statusMessage}
+              </>
+            ) : (
+              <>
+                <Send className="mr-2 h-4 w-4" /> Generate Email
+              </>
+            )}
           </Button>
         </form>
+
         {emailContent && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-2">
-              Generated Email:
+          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-lg font-semibold mb-3 text-blue-400">
+              Generated Draft:
             </h2>
             <Textarea
               value={emailContent}
               readOnly
-              className="w-full "
-              rows={8}
+              className="w-full bg-slate-900 border-slate-700 text-slate-300 leading-relaxed p-6 h-[300px]"
             />
           </div>
         )}
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 
