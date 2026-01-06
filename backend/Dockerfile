@@ -1,34 +1,18 @@
-# ===============================
-# Stage 1: Build (Maven + Java 21)
-# ===============================
-FROM maven:3.9-eclipse-temurin-21 AS build
-
+# Stage 1: Build the application using JDK 21
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
-
-# Cache dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source and build
-COPY src ./src
+COPY . .
+# Skip tests to speed up the build
 RUN mvn clean package -DskipTests
 
-# ===============================
-# Stage 2: Runtime (Lightweight JRE)
-# ===============================
+# Stage 2: Create the runtime image using JRE 21 (Lightweight)
 FROM eclipse-temurin:21-jre-alpine
-
 WORKDIR /app
-
-# Copy jar from build stage
+# Copy the jar file
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose application port
+# Expose port 8080
 EXPOSE 8080
 
-# Run with container-friendly JVM flags
-ENTRYPOINT ["java", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-jar", \
-  "app.jar"]
+# Run the app with memory limits for Render Free Tier
+ENTRYPOINT ["java", "-Xmx350m", "-jar", "app.jar"]
