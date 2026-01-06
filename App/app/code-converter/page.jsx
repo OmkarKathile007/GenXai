@@ -25,17 +25,46 @@ const CodeConverter = () => {
   const [statusMessage, setStatusMessage] = useState("");
 
   // Helper to extract clean code from JSON response
+  // const extractTextFromRawResponse = (rawString) => {
+  //   try {
+  //     const parsed = JSON.parse(rawString);
+  //     let text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
+  //     // CLEANUP: Remove Markdown backticks (```java ... ```) and whitespace
+  //     text = text.replace(/^```[a-z]*\n/i, "") // Remove opening ```java
+  //                .replace(/```$/i, "")         // Remove closing ```
+  //                .trim();                      // Remove extra spaces
+      
+  //     return text || "No code returned.";
+  //   } catch (e) {
+  //     return rawString;
+  //   }
+  // };
+
+  // Helper to strictly extract ONLY code
   const extractTextFromRawResponse = (rawString) => {
     try {
       const parsed = JSON.parse(rawString);
       let text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      
-      // CLEANUP: Remove Markdown backticks (```java ... ```) and whitespace
-      text = text.replace(/^```[a-z]*\n/i, "") // Remove opening ```java
-                 .replace(/```$/i, "")         // Remove closing ```
-                 .trim();                      // Remove extra spaces
-      
-      return text || "No code returned.";
+
+      // 1. Remove Markdown Code Block Wrappers (```java ... ```)
+      // We use a global regex (g) to catch start and end tags
+      text = text.replace(/```[a-z]*\n?/gi, "") // Remove opening ```python or ```
+                 .replace(/```/g, "");          // Remove closing ```
+
+      // 2. Remove common conversational prefixes the AI might slip in
+      const badPrefixes = ["Here is the code", "Sure", "The code is", "Output:"];
+      badPrefixes.forEach(prefix => {
+        if (text.trim().toLowerCase().startsWith(prefix.toLowerCase())) {
+           // Find the first newline and slice everything before it
+           const firstLineBreak = text.indexOf('\n');
+           if (firstLineBreak !== -1) {
+             text = text.substring(firstLineBreak);
+           }
+        }
+      });
+
+      return text.trim(); // Remove leading/trailing whitespace
     } catch (e) {
       return rawString;
     }
