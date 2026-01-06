@@ -3,6 +3,7 @@ package com.genaibackend.aibackend.service;
 import com.genaibackend.aibackend.entity.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +22,25 @@ public class JobWorker {
         this.aiService = aiService;
     }
 
-    @Scheduled(fixedDelay = 2000)
-    public void processJobs() {
+    // 1. EVENT TRIGGER: Called immediately by the Controller when a user submits data.
+    // @Async ensures this runs in a separate thread so the user gets an instant "Job Created" response.
+    @Async
+    public void triggerJobProcessing() {
+        processPendingJobs();
+    }
+
+    // 2. SAFETY NET: Runs once every 5 minutes to pick up any jobs that might have stuck during a restart.
+    // 300000ms = 5 minutes.
+    @Scheduled(fixedDelay = 300000)
+    public void cleanupStrandedJobs() {
+        processPendingJobs();
+    }
+
+    private void processPendingJobs() {
         List<Job> jobs = jobService.getPendingJobs();
+        if (jobs.isEmpty()) return; // Don't log if nothing to do
+
+        log.info("Worker Woken Up: Found {} jobs", jobs.size());
         for (Job job : jobs) {
             processSingleJob(job);
         }
@@ -36,18 +53,18 @@ public class JobWorker {
             job.setStatus(Job.JobStatus.PROCESSING);
             jobService.saveJob(job);
 
-            //  EXECUTE AI (The Magic)
+            // EXECUTE AI
             String aiResponse = aiService.executeTool(job.getToolName(), job.getInputData());
 
-            //  Success Update
+            // Success Update
             job.setResponseData(aiResponse);
             job.setStatus(Job.JobStatus.COMPLETED);
             job.setCompletedAt(java.time.LocalDateTime.now());
 
-            //  Track Usage (Simple estimation: 1 char ~= 1 token)
-            int estimatedTokens = aiResponse.length();
+            // Simple Token Estimation
+            int estimatedTokens = aiResponse != null ? aiResponse.length() : 0;
             job.setTokenUsage(estimatedTokens);
-            job.setCost(estimatedTokens * 0.0000005); // Dummy cost calc
+            job.setCost(estimatedTokens * 0.0000005); 
 
             jobService.saveJob(job);
             log.info("Job {} SUCCESS. Tokens: {}", job.getId(), estimatedTokens);
