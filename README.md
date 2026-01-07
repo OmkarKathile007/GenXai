@@ -24,7 +24,7 @@
 
 ## 💡 What is GenXai?
 
-**GenXai** is a unified AI-driven productivity platform built for performance and scalability. It aggregates 6+ advanced AI tools—including code conversion, roadmap generation, and email writing—into a single, modern dashboard.
+**GenXai** is a unified AI-driven productivity platform built for performance and scalability. It aggregates 6+ advanced AI tools including code conversion, roadmap generation, and email writing into a single, modern dashboard.
 
 Unlike simple API wrappers, **GenXai handles high-latency AI tasks asynchronously**. We engineered a custom backend architecture that processes heavy workloads in the background, ensuring the user interface remains responsive and never freezes, even when the AI takes 10+ seconds to generate a response.
 
