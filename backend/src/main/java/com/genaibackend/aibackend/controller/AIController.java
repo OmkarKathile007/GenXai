@@ -3,7 +3,7 @@ package com.genaibackend.aibackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.genaibackend.aibackend.entity.Job;
 import com.genaibackend.aibackend.service.JobService;
-import com.genaibackend.aibackend.service.JobWorker; 
+import com.genaibackend.aibackend.service.JobWorker;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
