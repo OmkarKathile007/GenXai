@@ -25,8 +25,7 @@ export default function SignupPage() {
     setError("");
 
     try {
-      // FIX: Your backend requires 'username', 'email', and 'password'.
-      // We send the EMAIL into the USERNAME field so you can login with email.
+      
       const payload = {
         username: formData.email, // <--- Key Fix: Email is now the username
         email: formData.email,
@@ -51,7 +50,7 @@ export default function SignupPage() {
         throw new Error(data.message || "Signup failed");
       }
 
-      router.push("/login"); 
+      router.push("/onboarding"); 
       
     } catch (err) {
       setError(err.message);
