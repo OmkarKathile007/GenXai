@@ -41,13 +41,17 @@ public class JobWorker {
         if (jobs.isEmpty()) return; // Don't log if nothing to do
 
         log.info("Worker Woken Up: Found {} jobs", jobs.size());
+        int indx=1;
         for (Job job : jobs) {
+            System.out.println("Job = "+indx);
             processSingleJob(job);
+            indx++;
         }
     }
 
     private void processSingleJob(Job job) {
         log.info("Starting Job: {}", job.getId());
+        System.out.println(job.getToolName());
 
         try {
             job.setStatus(Job.JobStatus.PROCESSING);

@@ -14,6 +14,8 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, String> {
     // Find jobs that are waiting to be processed
-    List<Job> findByStatus(Job.JobStatus status);
+//    List<Job> findByStatus(Job.JobStatus status);
     long countByCreatedAtAfter(LocalDateTime date);
+
+    List<Job> findByStatusOrderByCreatedAtAsc(Job.JobStatus status);
 }

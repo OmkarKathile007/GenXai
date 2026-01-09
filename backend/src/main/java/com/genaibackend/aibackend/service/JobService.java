@@ -35,7 +35,8 @@ public class JobService {
     }
 
     public List<Job> getPendingJobs() {
-        return jobRepository.findByStatus(Job.JobStatus.CREATED);
+//        return jobRepository.findByStatus(Job.JobStatus.CREATED);
+        return jobRepository.findByStatusOrderByCreatedAtAsc(Job.JobStatus.CREATED);
     }
 
     public void saveJob(Job job) {
