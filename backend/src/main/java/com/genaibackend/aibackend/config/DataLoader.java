@@ -96,6 +96,20 @@ public class DataLoader implements CommandLineRunner {
                         "Keep it within 200 words."
         );
 
+        // grammar improver
+        createPromptIfNotExists(
+                "improver",
+                1,
+                "You are an expert English grammar editor with professional writing experience.",
+                "Improve the grammar, spelling, punctuation, and sentence structure of the following text.\n" +
+                        "Do not change the original meaning or tone.\n" +
+                        "Do not add explanations, suggestions, or extra text.\n" +
+                        "Return only the corrected version in plain text.\n" +
+                        "If the input is already correct, return it exactly as-is.\n" +
+                        "Text:\n{{text}}"
+        );
+
+
         System.out.println("--- PROMPT CHECK COMPLETE ---");
     }
 
