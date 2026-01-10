@@ -15,6 +15,7 @@ const CoverLetterGenerator = () => {
   const [coverLetter, setCoverLetter] = useState("");
   
   // Async States
+  // const BACKEND_URL="http://localhost:8080";
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -33,6 +34,7 @@ const CoverLetterGenerator = () => {
       try {
         const { data } = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+          // `${BACKEND_URL}/api/ai/job/${jobId}`,
         );
 
         console.log("Polling...", data.status);
@@ -78,6 +80,7 @@ const CoverLetterGenerator = () => {
       // 2. Submit Job
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/letter`,
+        // `${BACKEND_URL}/api/ai/letter`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
