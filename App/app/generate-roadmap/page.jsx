@@ -12,6 +12,7 @@ const GenAI = () => {
     const [displayQuiz, setDisplayquiz] = useState(false);
     const [hide, setHidden] = useState("");
     const [statusMessage, setStatusMessage] = useState("");
+    const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
 
     // Helper to extract clean text from raw Gemini JSON
     const extractTextFromRawResponse = (rawString) => {
@@ -27,7 +28,7 @@ const GenAI = () => {
         const pollInterval = setInterval(async () => {
             try {
                 const { data } = await axios.get(
-                    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+                    `${BACKEND_URL}/api/ai/job/${jobId}`
                 );
 
                 console.log("Polling...", data.status);
@@ -73,7 +74,7 @@ const GenAI = () => {
             const payload = { question: question }; 
 
             const { data } = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/roadmap`,
+                `${BACKEND_URL}/api/ai/roadmap`,
                 payload,
                 { headers: { "Content-Type": "application/json" } }
             );

@@ -42,6 +42,7 @@ const CodeConverter = () => {
   // };
 
   // Helper to strictly extract ONLY code
+  const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
   const extractTextFromRawResponse = (rawString) => {
     try {
       const parsed = JSON.parse(rawString);
@@ -74,7 +75,7 @@ const CodeConverter = () => {
     const pollInterval = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+          `${BACKEND_URL}/api/ai/job/${jobId}`
         );
 
         console.log("Polling...", data.status);

@@ -15,7 +15,9 @@ const ImproveText = () => {
   // Async States
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  // const BACKEND_URL="http://localhost:8080";
+  
+
+  const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
 
   // Helper to clean up Gemini's raw JSON response
   const extractTextFromRawResponse = (rawString) => {
@@ -71,7 +73,7 @@ const ImproveText = () => {
       // 1. Submit Job
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/text`,
-        `${BACKEND_URL}/api/ai/text`,
+        // `${BACKEND_URL}/api/ai/text`,
         { text: inputText },
         { headers: { "Content-Type": "application/json" } }
       );

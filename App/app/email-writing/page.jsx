@@ -17,7 +17,7 @@ const EmailWriter = () => {
   // Async States
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-
+  const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
   // Helper to extract clean text from raw Gemini JSON
   const extractTextFromRawResponse = (rawString) => {
     try {
@@ -32,7 +32,7 @@ const EmailWriter = () => {
     const pollInterval = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/job/${jobId}`
+          `${BACKEND_URL}/api/ai/job/${jobId}`
         );
 
         console.log("Polling...", data.status);
@@ -77,7 +77,7 @@ const EmailWriter = () => {
       };
 
       const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ai/email`,
+        `${BACKEND_URL}/api/ai/email`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
