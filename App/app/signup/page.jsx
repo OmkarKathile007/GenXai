@@ -15,6 +15,8 @@ export default function SignupPage() {
   });
   const [error, setError] = useState("");
 
+
+  const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -32,7 +34,7 @@ export default function SignupPage() {
         password: formData.password
       };
 
-      const response = await fetch("http://localhost:8080/auth/register", {
+      const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

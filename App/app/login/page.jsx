@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { User, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext"; 
 
+
+const BACKEND_URL=process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth(); 
@@ -32,7 +34,7 @@ export default function LoginPage() {
         password: formData.password
       };
 
-      const response = await fetch("http://localhost:8080/auth/login", { 
+      const response = await fetch(`${BACKEND_URL}/auth/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
