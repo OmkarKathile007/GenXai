@@ -7,6 +7,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql)
 
 ![Landing Page](App/public/images/landing.png)
+![Landing Page](App/public/images/genxhub.png)
 *(The modern Bento Grid interface connecting all AI tools)*
 
 ---
