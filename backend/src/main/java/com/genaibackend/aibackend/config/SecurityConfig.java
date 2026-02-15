@@ -47,9 +47,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         //  Allow Login & Register (Explicit String Matcher)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/ping").permitAll()
+                        
+
                         //  Allow Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
