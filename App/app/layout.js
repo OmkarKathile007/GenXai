@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
+            {/* <Header /> */}
             <main className="min-h-screen">
               {children} 
               <Analytics />

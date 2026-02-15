@@ -5,13 +5,14 @@ import { howItWorks } from "@/data/howItWorks";
 import { testimonial } from "@/data/testimonial";
 import { faqs } from "@/data/faqs";
 import Link from "next/link";
+import Headersection from "@/components/shared/Header";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-slate-200 selection:bg-blue-500/30 font-sans">
-      
+      <Headersection />
       <HeroSection />
 
       {/* --- FEATURES SECTION (Bento Grid Style) --- */}
