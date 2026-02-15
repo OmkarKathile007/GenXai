@@ -3,8 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; 
-import { useAuth } from "@/context/AuthContext"; 
-import { Button } from "./ui/button";
+import { useAuth } from "@/components/providers/AuthProvider"; 
+import { Button } from "@/components/ui/button";
 import { Command } from "lucide-react";
 
 function HeroSection() {

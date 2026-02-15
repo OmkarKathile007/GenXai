@@ -6,7 +6,7 @@ import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy, Loader2, Sparkles, PenTool } from "lucide-react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/features/auth/ProtectedRoute";
 
 const ImproveText = () => {
   const [inputText, setInputText] = useState("");

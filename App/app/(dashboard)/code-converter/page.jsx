@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy, Loader2 } from "lucide-react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/features/auth/ProtectedRoute";
 
 const CodeConverter = () => {
   const [inputLanguage, setInputLanguage] = useState("");

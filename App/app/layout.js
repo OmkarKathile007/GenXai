@@ -1,10 +1,10 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import Header from "@/components/header"; // Ensure this path matches your file structure
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import Header from "@/components/shared/Header"; // Ensure this path matches your file structure
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
-import { AuthProvider } from "@/context/AuthContext"; // Import your custom provider
+import { AuthProvider } from "@/components/providers/AuthProvider"; // Import your custom provider
 
 const inter = Inter({ subsets: ['latin'] });
 

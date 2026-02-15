@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import HeroSection from "@/components/hero";
+import HeroSection from "@/components/shared/Hero";
 import { features } from "@/data/features";
 import { howItWorks } from "@/data/howItWorks";
 import { testimonial } from "@/data/testimonial";

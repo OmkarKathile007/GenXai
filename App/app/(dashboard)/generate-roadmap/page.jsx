@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import SpinnerLoad from '@/components/SpinnerLoad'; // Ensure this path is correct for your project
-import ProtectedRoute from '@/components/ProtectedRoute';
+import SpinnerLoad from '@/components/shared/LoadingSpinner'; // Ensure this path is correct for your project
+import ProtectedRoute from '@/components/features/auth/ProtectedRoute';
 
 const GenAI = () => {
     const [question, setQuestion] = useState("");

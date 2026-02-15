@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext"; // Import the custom hook
+import { useAuth } from "@/components/providers/AuthProvider"; // Import the custom hook
 import { 
   Menu, 
   ChevronRight,
