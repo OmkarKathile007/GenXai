@@ -49,6 +49,7 @@ public class SecurityConfig {
                         //  Allow Login & Register (Explicit String Matcher)
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
+                        .requestMatchers("/ping").permitAll()
                         //  Allow Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
@@ -64,8 +65,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // frontend origin
-//        configuration.setAllowedOrigins(List.of("https://genxai-psi.vercel.app"));
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+       configuration.setAllowedOrigins(List.of("https://genxai-psi.vercel.app"));
+        // configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
