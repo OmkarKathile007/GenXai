@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/roadmaps/**").permitAll()
 
                         .requestMatchers("/ping").permitAll()
                         
@@ -70,8 +70,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // frontend origin
-//       configuration.setAllowedOrigins(List.of("https://genxai-psi.vercel.app"));
-         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+       configuration.setAllowedOrigins(List.of("https://genxai-psi.vercel.app","http://localhost:3000"));
+
 
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
