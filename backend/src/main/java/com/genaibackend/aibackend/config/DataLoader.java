@@ -21,17 +21,35 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("--- CHECKING PROMPTS ---");
 
         //  Roadmap Generator (Structured JSON Output)
+//        createPromptIfNotExists(
+//                "roadmap",
+//                1,
+//                "You are a Senior Technical Career Coach. Your goal is to create practical, step-by-step learning roadmaps.",
+//                "Create a detailed {{duration}} roadmap for learning {{topic}}. \n" +
+//                        "Format the response as a JSON object with this structure: \n" +
+//                        "{ \"title\": \"...\", \"phases\": [ { \"week\": \"1-2\", \"topic\": \"...\", \"details\": \"...\" } ] } \n" +
+//                        "Do NOT output markdown code blocks. Output raw JSON only."
+//        );
         createPromptIfNotExists(
                 "roadmap",
-                1,
-                "You are a Senior Technical Career Coach. Your goal is to create practical, step-by-step learning roadmaps.",
-                "Create a detailed {{duration}} roadmap for learning {{topic}}. \n" +
-                        "Format the response as a JSON object with this structure: \n" +
-                        "{ \"title\": \"...\", \"phases\": [ { \"week\": \"1-2\", \"topic\": \"...\", \"details\": \"...\" } ] } \n" +
-                        "Do NOT output markdown code blocks. Output raw JSON only."
+                3, // Version bump
+                "You are an elite productivity coach specialized in Deep Work.",
+                "Analyze the goal: {{question}}. \n" +
+                        "Create a strict 7-day 'Deep Work' schedule starting from Day 1 to Day 7. \n" +
+                        "For each day, provide a SINGLE, punchy, high-impact focus title (max 10 words). \n" +
+                        "Format strictly as JSON: \n" +
+                        "{ \n" +
+                        "  \"schedule\": [ \n" +
+                        "    { \"day\": 1, \"focus\": \"Market Research & Competitor Deep Dive\" }, \n" +
+                        "    { \"day\": 2, \"focus\": \"...\" } \n" +
+                        "    // ... until day 7 \n" +
+                        "  ] \n" +
+                        "} \n" +
+                        "Rules: \n" +
+                        "1. Output exactly 7 items. \n" +
+                        "2. The 'focus' must be a short actionable title, NOT a paragraph. \n" +
+                        "3. No Markdown blocks. Raw JSON only."
         );
-
-
         //  Code Converter (High Quality Code)
         createPromptIfNotExists(
                 "converter",
@@ -69,12 +87,37 @@ public class DataLoader implements CommandLineRunner {
 
 
         //  Text Summarizer (Concise & Technical)
+        // Text Summarizer (Configurable)
+
         createPromptIfNotExists(
                 "summarizer",
-                1,
-                "You are a Technical Editor. You summarize complex text into clear, concise bullet points.",
-                "Summarize the following text in exactly 3 bullet points. Keep it under 50 words total.\nText:\n{{text}}"
+                2,
+
+                "You are an accuracy-first, neutral summarization engine. Generate a concise summary strictly from the provided text.\n" +
+                        "Rules:\n" +
+                        "- Never add or infer information.\n" +
+                        "- Preserve all numbers, names, dates, and domain-specific terms exactly.\n" +
+                        "- Maintain original tone and intent.\n" +
+                        "- Ensure logical consistency with no contradictions.\n" +
+                        "- Prioritize core arguments, conclusions, and evidence.\n" +
+                        "- Avoid repetition.\n" +
+                        "- Represent multiple viewpoints fairly.\n" +
+                        "- If information is unclear, respond: \"Not clearly specified in the text\".\n" +
+                        "Output must be clear, structured, coherent, and contain no meta commentary.",
+
+                "Summarize the following text.\n\n" +
+                        "Length: {{length}}\n" +
+                        "Format: {{format}}\n\n" +
+                        "Length behavior:\n" +
+                        "- Follow the user-provided length strictly.\n" +
+                        "- If a word range is given, stay within it.\n" +
+                        "- If a single value is given, approximate closely.\n\n" +
+                        "Format behavior:\n" +
+                        "- paragraph: flowing paragraphs\n" +
+                        "- bullet: • key points\n\n" +
+                        "Text:\n{{text}}"
         );
+
 
         //  Professional Email
         createPromptIfNotExists(
