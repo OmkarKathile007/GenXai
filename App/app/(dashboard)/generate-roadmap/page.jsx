@@ -38,6 +38,7 @@ const GenAI = () => {
   const [schedule, setSchedule] = useState([]);
   const [loader, setLoader] = useState(false);
   const [displayGrid, setDisplayGrid] = useState(false);
+  const [error, setError] = useState("");
 
   // NEW STATE FOR HISTORY & SAVING ---
   const [savedRoadmaps, setSavedRoadmaps] = useState([]);

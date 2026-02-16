@@ -21,6 +21,7 @@ const CodeConverter = () => {
   const [convertedCode, setConvertedCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [error, setError] = useState("");
 
   // Helper to extract clean code from JSON response
   // const extractTextFromRawResponse = (rawString) => {

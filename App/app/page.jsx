@@ -163,7 +163,7 @@ export default function Home() {
       {/* --- FOOTER --- */}
       <footer className="border-t border-white/10 bg-black py-12">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
-          <p>&copy; 2024 GenXAI. All rights reserved.</p>
+          <p>&copy; 2026 GenXAI. All rights reserved.</p>
           <div className="flex items-center gap-1 mt-4 md:mt-0">
             <span>Made with</span>
             <span className="text-red-500">♥</span>

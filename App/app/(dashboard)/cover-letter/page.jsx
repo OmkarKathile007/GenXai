@@ -13,6 +13,7 @@ const CoverLetterGenerator = () => {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
+  const [error, setError] = useState("");
 
   // Async States
   const BACKEND_URL =
@@ -158,7 +159,7 @@ const CoverLetterGenerator = () => {
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Paste the job description or list your skills here..."
-                className="h-[120px] bg-slate-950 border-slate-700"
+                className="min-h-[100px] bg-slate-950 border-slate-700"
               />
             </div>
 

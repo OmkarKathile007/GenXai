@@ -24,13 +24,7 @@ const cards = [
     gradient: "from-emerald-400 to-teal-500",
   },
   
-  {
-    title: "Cover Letter Generator",
-    description: "Create professional cover letters in seconds",
-    href: "/cover-letter",
-    action: "Generate",
-    gradient: "from-rose-400 to-amber-400",
-  },
+  
   {
     title: "Generate Career Roadmap",
     description: "AI-powered personalized career planning",
@@ -58,7 +52,14 @@ const cards = [
     href: "/code-converter",
     action: "Convert",
     gradient: "from-indigo-500 to-violet-600",
-  }
+  },
+  {
+    title: "Cover Letter Generator",
+    description: "Create professional cover letters in seconds",
+    href: "/cover-letter",
+    action: "Generate",
+    gradient: "from-rose-400 to-amber-400",
+  },
 ];
 
 export default function OnboardingForm() {

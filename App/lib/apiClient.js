@@ -1,7 +1,6 @@
 
  // Central API client that handles rate limit (429) responses globally.
  
-
 import axios from "axios";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";

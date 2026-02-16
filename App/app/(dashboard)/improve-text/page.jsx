@@ -14,6 +14,7 @@ const ImproveText = () => {
   // Async States
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [error, setError] = useState("");
 
   const BACKEND_URL =
     process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";

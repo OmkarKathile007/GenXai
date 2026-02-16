@@ -13,6 +13,7 @@ const EmailWriter = () => {
   const [subject, setSubject] = useState("");
   const [points, setPoints] = useState(""); // New field for email context
   const [emailContent, setEmailContent] = useState("");
+  const [error, setError] = useState("");
 
   // Async States
   const [loading, setLoading] = useState(false);
@@ -155,7 +156,7 @@ const EmailWriter = () => {
                 value={points}
                 onChange={(e) => setPoints(e.target.value)}
                 placeholder="What do you want to say? (e.g. 'Asking for a meeting on Tuesday to discuss the budget')"
-                className="h-[100px] bg-slate-950 border-slate-700 text-white"
+                className="min-h-[200px] bg-slate-950 border-slate-700 text-white"
               />
             </div>
 
