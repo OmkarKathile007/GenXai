@@ -5,7 +5,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Lock, ArrowRight, Loader2, UserCircle } from "lucide-react"; // Added UserCircle
+import { User, Lock, ArrowRight, Loader2, UserCircle } from "lucide-react"; 
 import { useAuth } from "@/components/providers/AuthProvider"; 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8080";
@@ -15,7 +15,7 @@ export default function LoginPage() {
   const { login } = useAuth(); 
   
   const [isLoading, setIsLoading] = useState(false);
-  const [isGuestLoading, setIsGuestLoading] = useState(false); // Separate loading state for guest
+  const [isGuestLoading, setIsGuestLoading] = useState(false); 
   const [formData, setFormData] = useState({
     username: "", 
     password: "",
@@ -50,7 +50,7 @@ export default function LoginPage() {
     try {
      
 
-      // OPTION 2: If you just want to use a hardcoded guest account (Uncomment below, comment above)
+      //  A hardcoded guest account 
        const response = await fetch(`${BACKEND_URL}/auth/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -83,7 +83,7 @@ export default function LoginPage() {
     }
   };
 
-  // Reusable login logic (optional, helps keep code DRY if using Option 2 heavily)
+  // Reusable login logic 
   const performLogin = async (username, password) => {
     const payload = { username, password };
     const response = await fetch(`${BACKEND_URL}/auth/login`, { 
