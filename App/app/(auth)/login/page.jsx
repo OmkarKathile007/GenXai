@@ -111,7 +111,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0a0a] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] flex items-center justify-center ">
+    <div className="min-h-screen w-full bg-[#0a0a0a] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] flex items-center justify-center p-4 ">
       
        <div className="relative w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
         <div className="text-center mb-8">
@@ -139,7 +139,8 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium text-gray-300">Password</label>
-              <Link href="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+             { /* Link href should be /forgot-password, but we can change it later when we have that page*/}
+              <Link href="/signup" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -180,7 +181,7 @@ export default function LoginPage() {
             </button>
 
             {/* Guest Login Button */}
-            <button
+            {/* <button
               type="button"
               onClick={handleGuestLogin}
               disabled={isLoading || isGuestLoading}
@@ -194,7 +195,7 @@ export default function LoginPage() {
                   Continue as Guest
                 </>
               )}
-            </button>
+            </button> */}
           </div>
         </form>
 
