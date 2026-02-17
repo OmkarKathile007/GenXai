@@ -6,8 +6,18 @@
 ![Next.js](https://img.shields.io/badge/Next.js-Frontend-black?logo=next.js)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql)
 
+### Landing Page
 ![Landing Page](App/public/images/landing.png)
+### Main 
 ![Landing Page](App/public/images/genxhub.png)
+### Text Summarizer
+![Text Summarizer](App/public/images/summarize.png)
+### Roadmap Home
+![Roadmap1](App/public/images/roadmp1.png)
+### Roadmap Result
+![Roadmap2](App/public/images/roadmap.png)
+### Code Converter
+![codeconvert](App/public/images/code.png)
 *(The modern Bento Grid interface connecting all AI tools)*
 
 ---
