@@ -33,9 +33,9 @@
 
 ---
 
-## 💡 What is GenXai?
+## 💡 What is GenxAI?
 
-**GenXai** is a unified AI-driven productivity platform built for performance and scalability. It aggregates 6+ advanced AI tools including code conversion, roadmap generation, and email writing into a single, modern dashboard.
+**GenxAI** is a unified AI-driven productivity platform built for performance and scalability. It aggregates 6+ advanced AI tools including code conversion, roadmap generation, and email writing into a single, modern dashboard.
 
 Unlike simple API wrappers, **GenXai handles high-latency AI tasks asynchronously**. We engineered a custom backend architecture that processes heavy workloads in the background, ensuring the user interface remains responsive and never freezes, even when the AI takes 10+ seconds to generate a response.
 
@@ -79,7 +79,7 @@ AI models often "hallucinate" or add conversational fluff (e.g., *"Here is your 
 
 ### Backend (The Brain)
 - **Framework:** Java Spring Boot 3
-- **Database:** PostgreSQL (Jobs, Prompts, Users)
+- **Database:** PostgreSQL, Neon DB (Jobs, Prompts, Users)
 - **Security:** Spring Security + JWT
 - **Architecture:** Async/Await Pattern, Event-Driven
 - **AI Integration:** Google Gemini API
@@ -94,62 +94,96 @@ AI models often "hallucinate" or add conversational fluff (e.g., *"Here is your 
 
 ## 🏗 Architecture & Flow
 
-This sequence diagram illustrates the **Async Polling Pattern** used to decouple the frontend from high-latency AI operations.
-
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Controller
-    participant Worker
-    participant Database
-
-    User->>Frontend: Clicks "Generate"
-    Frontend->>Controller: POST /api/ai/convert
-    Controller->>Database: Create Job (Status: PENDING)
-    Controller-->>Frontend: Return Job ID #123 (Instant 202)
+flowchart TD
+    %% Client Layer
+    UI[React/Next.js Frontend]
     
-    par Background Processing
-        Controller->>Worker: Trigger Async Event
-        Worker->>Database: Fetch Job & Prompt Persona
-        Worker->>Worker: Call Google Gemini API
-        Worker->>Database: Save Result (Status: COMPLETED)
-    end
-
-    loop Polling (Every 2s)
-        Frontend->>Database: GET /job/123 status
-    end
+    %% Security Layer
+    CORS[CORS Filter]
+    JWT[JWT Auth Filter]
+    SEC[Spring Security]
     
-    Database-->>Frontend: Status: COMPLETED
-    Frontend->>User: Display Result
-
-
-
-
-## Project Structure
-
-├── app/ (Frontend - Next.js)
-│   ├── (auth)               # Authentication Pages
-│   ├── generate-roadmap/    # Tool: Roadmap Logic
-│   ├── components/          # UI Components (Bento Grid, Header)
-│   └── lib/                 # API Utilities
-│
-├── aibackend/ (Backend - Spring Boot)
-│   ├── src/main/java/com/genxai/
-│   │   ├── controller/      # REST API Endpoints
-│   │   ├── service/         # Async JobWorker & AI Logic
-│   │   ├── entity/          # DB Models (Job, Prompt)
-│   │   ├── config/          # JWT & Async Configuration
-│   │   └── dto/             # Data Transfer Objects
-│   └── resources/           # SQL Prompts & App Properties
-
+    %% Controllers
+    AUTH_C[Auth Controller]
+    AI_C[AI Controller]
+    ROADMAP_C[Roadmap Controller]
+    
+    %% Services
+    AUTH_S[Auth Service]
+    JOB_S[Job Service]
+    AI_S[AI Service]
+    PROMPT_S[Prompt Service]
+    ROADMAP_S[Roadmap Service]
+    WORKER[Job Worker - Async]
+    
+    %% Repositories
+    USER_R[(User Repository)]
+    JOB_R[(Job Repository)]
+    PROMPT_R[(Prompt Repository)]
+    ROADMAP_R[(Roadmap Repository)]
+    
+    %% Database
+    DB[(PostgreSQL Database)]
+    
+    %% External
+    GEMINI[Google Gemini API]
+    
+    %% Main Flow
+    UI -->|1. HTTP Request| CORS
+    CORS -->|2. Validate| JWT
+    JWT -->|3. Check Token| SEC
+    SEC -->|4. Route Request| AUTH_C
+    SEC -->|4. Route Request| AI_C
+    SEC -->|4. Route Request| ROADMAP_C
+    
+    %% Auth Flow
+    AUTH_C -->|5. Register/Login| AUTH_S
+    AUTH_S -->|6. Query User| USER_R
+    USER_R -->|7. Database Query| DB
+    
+    %% AI Job Flow
+    AI_C -->|5. Create Job| JOB_S
+    JOB_S -->|6. Save Job| JOB_R
+    JOB_R -->|7. Store in DB| DB
+    AI_C -->|8. Trigger Worker| WORKER
+    WORKER -->|9. Process Job| AI_S
+    AI_S -->|10. Get Prompt| PROMPT_S
+    PROMPT_S -->|11. Query Prompts| PROMPT_R
+    PROMPT_R -->|12. Fetch from DB| DB
+    AI_S -->|13. Call API| GEMINI
+    GEMINI -->|14. AI Response| AI_S
+    AI_S -->|15. Return Result| WORKER
+    WORKER -->|16. Update Job| JOB_R
+    JOB_R -->|17. Save Result| DB
+    
+    %% Roadmap Flow
+    ROADMAP_C -->|5. CRUD Operations| ROADMAP_S
+    ROADMAP_S -->|6. Query/Update| ROADMAP_R
+    ROADMAP_R -->|7. Persist Data| DB
+    
+    %% Styling
+    style UI fill:#2563eb,stroke:#1e40af,color:#fff
+    style CORS fill:#10b981,stroke:#059669,color:#fff
+    style JWT fill:#10b981,stroke:#059669,color:#fff
+    style SEC fill:#10b981,stroke:#059669,color:#fff
+    style AUTH_C fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style AI_C fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style ROADMAP_C fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style AUTH_S fill:#f59e0b,stroke:#d97706,color:#fff
+    style JOB_S fill:#f59e0b,stroke:#d97706,color:#fff
+    style AI_S fill:#f59e0b,stroke:#d97706,color:#fff
+    style PROMPT_S fill:#f59e0b,stroke:#d97706,color:#fff
+    style ROADMAP_S fill:#f59e0b,stroke:#d97706,color:#fff
+    style WORKER fill:#ef4444,stroke:#dc2626,color:#fff
+    style USER_R fill:#6366f1,stroke:#4f46e5,color:#fff
+    style JOB_R fill:#6366f1,stroke:#4f46e5,color:#fff
+    style PROMPT_R fill:#6366f1,stroke:#4f46e5,color:#fff
+    style ROADMAP_R fill:#6366f1,stroke:#4f46e5,color:#fff
+    style DB fill:#0ea5e9,stroke:#0284c7,color:#fff
+    style GEMINI fill:#ec4899,stroke:#db2777,color:#fff
 ```
 
-## 🚀 Installation
 
-### Prerequisites
-- Java 17+
-- Node.js 18+
-- PostgreSQL
-- Google Gemini API Key
 
+This sequence diagram illustrates the **Async Polling Pattern** used to decouple the frontend from high-latency AI operations.
